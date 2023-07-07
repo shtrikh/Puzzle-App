@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Puzzle</title>
+    <style>
+        body {
+            font-family: "Courier New", Courier, monospace;
+            text-align: center;
+        }
+
+        .button-50 {
+            appearance: button;
+            background-color: #000;
+            background-image: none;
+            border: 1px solid #000;
+            border-radius: 4px;
+            box-shadow: #fff 4px 4px 0 0, #000 4px 4px 0 1px;
+            box-sizing: border-box;
+            color: #fff;
+            cursor: pointer;
+            display: inline-block;
+            font-family: ITCAvantGardeStd-Bk, Arial, sans-serif;
+            font-size: 14px;
+            font-weight: 400;
+            line-height: 20px;
+            margin: 0 5px 10px 0;
+            overflow: visible;
+            padding: 12px 40px;
+            text-align: center;
+            text-transform: none;
+            touch-action: manipulation;
+            user-select: none;
+            -webkit-user-select: none;
+            vertical-align: middle;
+            white-space: nowrap;
+        }
+
+        .button-50:focus {
+            text-decoration: none;
+        }
+
+        .button-50:hover {
+            text-decoration: none;
+        }
+
+        .button-50:active {
+            box-shadow: rgba(0, 0, 0, .125) 0 3px 5px inset;
+            outline: 0;
+        }
+
+        .button-50:not([disabled]):active {
+            box-shadow: #fff 2px 2px 0 0, #000 2px 2px 0 1px;
+            transform: translate(2px, 2px);
+        }
+
+        @media (min-width: 768px) {
+            .button-50 {
+                padding: 12px 50px;
+            }
+        }
+
+        .image-part {
+            display: inline-block;
+            width: 150px;
+            height: 150px;
+        }
+
+        .image-part img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+    </style>
+
+    <script>
+        var draggedElement = null;
+
+        function allowDrop(event) {
+            event.preventDefault();
+        }
+
+        function drag(event) {
+            draggedElement = event.target.parentNode;
+            event.dataTransfer.setData("text/plain", draggedElement.getAttribute("id"));
+        }
+
+        function drop(event) {
+            event.preventDefault();
+            var targetElement = event.target.parentNode;
+
+
+            var targetImage = targetElement.querySelector("img");
+            var draggedImage = draggedElement.querySelector("img");
+
+            var targetSrc = targetImage.getAttribute("src");
+            var targetAlt = targetImage.getAttribute("alt");
+
+            var draggedSrc = draggedImage.getAttribute("src");
+            var draggedAlt = draggedImage.getAttribute("alt");
+
+            var targetRotation = targetImage.style.transform;
+            var draggedRotation = draggedImage.style.transform;
+
+            targetImage.setAttribute("src", draggedSrc);
+            targetImage.setAttribute("alt", draggedAlt);
+            targetImage.style.transform = draggedRotation;
+
+            draggedImage.setAttribute("src", targetSrc);
+            draggedImage.setAttribute("alt", targetAlt);
+            draggedImage.style.transform = targetRotation;
+
+            targetImage.setAttribute("src", draggedSrc);
+            targetImage.setAttribute("alt", draggedAlt);
+
+            draggedImage.setAttribute("src", targetSrc);
+            draggedImage.setAttribute("alt", targetAlt);
+
+            var draggedId = draggedElement.getAttribute("id");
+            var targetId = targetElement.getAttribute("id");
+
+            sendImageSwapRequest(draggedId, targetId);
+        }
+
+        function rotateImage(event) {
+            var imagePart = event.target.parentNode;
+            var image = imagePart.querySelector("img");
+
+            image.style.transform += "rotate(90deg)";
+
+            var imageId = imagePart.getAttribute("id");
+
+            sendImageRotateRequest(imageId);
+        }
+
+        function sendImageSwapRequest(draggedId, targetId) {
+            var url = "/swap-images";
+            var data = {
+                draggedId: draggedId,
+                targetId: targetId
+            };
+
+            fetch(url, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify(data)
+            });
+        }
+
+        function sendImageRotateRequest(imageId) {
+            var url = "/rotate-image";
+            var data = {
+                imageId: imageId
+            };
+
+            fetch(url, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify(data)
+            });
+
+        }
+
+        var imageParts = document.getElementsByClassName("image-part");
+        for (var i = 0; i < imageParts.length; i++) {
+            imageParts[i].addEventListener("dblclick", rotateImage);
+        }
+    </script>
+</head>
+<body>
+<h1 >Puzzle</h1>
+<p th:text="${message}"></p>
+
+<div  id="imageContainer" ondrop="drop(event)" ondragover="allowDrop(event)">
+    <div class="image-part" id="0" draggable="true" ondragstart="drag(event)" ondblclick="rotateImage(event)">
+        <img src="/uploaded-images-shuffle/subimage_0.jpg" alt="Image Part 0">
+    </div>
+    <div class="image-part" id="1" draggable="true" ondragstart="drag(event)" ondblclick="rotateImage(event)">
+        <img src="/uploaded-images-shuffle/subimage_1.jpg" alt="Image Part 1">
+    </div>
+    <div class="image-part" id="2" draggable="true" ondragstart="drag(event)" ondblclick="rotateImage(event)">
+        <img src="/uploaded-images-shuffle/subimage_2.jpg" alt="Image Part 2">
+    </div>
+    <div class="image-part" id="3" draggable="true" ondragstart="drag(event)" ondblclick="rotateImage(event)">
+        <img src="/uploaded-images-shuffle/subimage_3.jpg" alt="Image Part 3">
+    </div>
+    <br/>
+    <div class="image-part" id="4" draggable="true" ondragstart="drag(event)" ondblclick="rotateImage(event)">
+        <img src="/uploaded-images-shuffle/subimage_4.jpg" alt="Image Part 4">
+    </div>
+    <div class="image-part" id="5" draggable="true" ondragstart="drag(event)" ondblclick="rotateImage(event)">
+        <img src="/uploaded-images-shuffle/subimage_5.jpg" alt="Image Part 5">
+    </div>
+    <div class="image-part" id="6" draggable="true" ondragstart="drag(event)" ondblclick="rotateImage(event)">
+        <img src="/uploaded-images-shuffle/subimage_6.jpg" alt="Image Part 6">
+    </div>
+    <div class="image-part" id="7" draggable="true" ondragstart="drag(event)" ondblclick="rotateImage(event)">
+        <img src="/uploaded-images-shuffle/subimage_7.jpg" alt="Image Part 7">
+    </div>
+    <br/>
+    <div class="image-part" id="8" draggable="true" ondragstart="drag(event)" ondblclick="rotateImage(event)">
+        <img src="/uploaded-images-shuffle/subimage_8.jpg" alt="Image Part 8">
+    </div>
+    <div class="image-part" id="9" draggable="true" ondragstart="drag(event)" ondblclick="rotateImage(event)">
+        <img src="/uploaded-images-shuffle/subimage_9.jpg" alt="Image Part 9">
+    </div>
+    <div class="image-part" id="10" draggable="true" ondragstart="drag(event)" ondblclick="rotateImage(event)">
+        <img src="/uploaded-images-shuffle/subimage_10.jpg" alt="Image Part 10">
+    </div>
+    <div class="image-part" id="11" draggable="true" ondragstart="drag(event)" ondblclick="rotateImage(event)">
+        <img src="/uploaded-images-shuffle/subimage_11.jpg" alt="Image Part 11">
+    </div>
+    <br/>
+    <div class="image-part" id="12" draggable="true" ondragstart="drag(event)" ondblclick="rotateImage(event)">
+        <img src="/uploaded-images-shuffle/subimage_12.jpg" alt="Image Part 12">
+    </div>
+    <div class="image-part" id="13" draggable="true" ondragstart="drag(event)" ondblclick="rotateImage(event)">
+        <img src="/uploaded-images-shuffle/subimage_13.jpg" alt="Image Part 13">
+    </div>
+    <div class="image-part" id="14" draggable="true" ondragstart="drag(event)" ondblclick="rotateImage(event)">
+        <img src="/uploaded-images-shuffle/subimage_14.jpg" alt="Image Part 14">
+    </div>
+    <div class="image-part" id="15" draggable="true" ondragstart="drag(event)" ondblclick="rotateImage(event)">
+        <img src="/uploaded-images-shuffle/subimage_15.jpg" alt="Image Part 15">
+    </div>
+</div>
+<button class="button-50" onclick="window.location.href='/win-check';">Check result</button>
+<button class="button-50" onclick="window.location.href='/win';">Make puzzles</button>
+</body>
+</html>
